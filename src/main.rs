@@ -1,9 +1,10 @@
 mod component;
 mod system;
 mod entity;
+mod plugin;
 
 use bevy::prelude::*;
-use crate::entity::{HelloPlugin};
+use plugin::HelloPlugin;
 
 fn main() {
     App::new()
