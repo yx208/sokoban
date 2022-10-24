@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use bevy::sprite::collide_aabb::collide;
 use bevy::window::close_on_esc;
 use bevy::math::Vec3Swizzles;
-use crate::components::{Enemy, FromPlayer, Laser, Movable, Player, SpriteSize, Velocity};
+use crate::components::{Enemy, ExplosionToSpawn, FromPlayer, Laser, Movable, Player, SpriteSize, Velocity};
 use crate::enemy::EnemyPlugin;
 use crate::player::PlayerPlugin;
 
@@ -103,7 +103,7 @@ fn setup_system(
         4,
         4
     );
-    texture_atlases.add(texture_atlas);
+    let explosion = texture_atlases.add(texture_atlas);
 
     // add game texture resource
     let game_textures = GameTextures {
@@ -167,9 +167,29 @@ fn player_laser_hit_enemy_system(
             if let Some(_) = collision {
                 // remove the enemy
                 commands.entity(enemy_entity).despawn();
+
                 // remove the laser
                 commands.entity(laser_entity).despawn();
+
+                // spawn the explosionToSpawn
+                commands.spawn().insert(ExplosionToSpawn(
+                    enemy_tf.translation.clone()
+                ));
             }
         }
+    }
+}
+
+fn explosion_to_spawn_system(
+    mut commands: Commands,
+    game_textures: Res<GameTextures>,
+    query: Query<(Entity, &ExplosionToSpawn)>
+) {
+    for (explosion_spawn_entity, explosion_to_spwan) in query.iter() {
+        // spawn the explosion sprite
+         commands.spawn_bundle(SpriteSheetBundle {
+             texture_atlas: game_textures.explosion.clone(),
+             ..default()
+         });
     }
 }
